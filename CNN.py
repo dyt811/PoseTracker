@@ -15,8 +15,11 @@ batch_size = 16
 #data = dataset.read_train_sets(train_path, img_size, classes, validation_size=validation_size)
 
 
+# Declare the input images and the labels.
 x = tf.placeholder(tf.float32, shape=[None, img_size, img_size, num_channels], name='x')
+
 y_true = tf.placeholder(tf.float32, shape=[None, num_classes], name='y_true')
+
 y_true_cls = tf.argmax(y_true, dimension=1)
 
 
