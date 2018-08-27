@@ -1,0 +1,4 @@
+tensorflow-gpu
+pillow
+Augmentor
+tqdm
