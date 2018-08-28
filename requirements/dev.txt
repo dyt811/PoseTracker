@@ -1,4 +1,7 @@
 tensorflow-gpu
+tensorflow
 pillow
 Augmentor
 tqdm
+imageio
+opencv-python
