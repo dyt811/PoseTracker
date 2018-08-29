@@ -1,6 +1,10 @@
 from PIL import Image
 import random
 
+"""
+This class explores the images and crop out as many smaller conforming image section as possible. 
+"""
+
 def area(image, x, y, width, height):
     img = Image.open(image)
     area = (x, y, x+width, y+height)
