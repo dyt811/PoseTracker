@@ -9,7 +9,7 @@ def area(image, x, y, width, height):
     img = Image.open(image)
     area = (x, y, x+width, y+height)
     cropped_img = img.crop(area)
-    cropped_img.show()
+    #cropped_img.show()
     return cropped_img
 
 def randomly(image, width, height):
@@ -18,7 +18,8 @@ def randomly(image, width, height):
 
     crop_wide_boundary = img_width - width
     crop_height_boundary = img_height - height
-
+    if crop_height_boundary < 0 or crop_wide_boundary < 0:
+        return None
     random_crop_x = int(random.uniform(0, crop_wide_boundary))
     random_crop_y = int(random.uniform(0, crop_height_boundary))
 

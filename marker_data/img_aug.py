@@ -1,7 +1,7 @@
 from imgaug import augmenters as iaa
 from datetime import datetime
 from marker_data.load_batch import from_folder
-
+from oshelper.filehelper import unique_name
 import imageio
 import os
 import shutil
@@ -35,12 +35,6 @@ def Aug100px():
     return aug_seq
 
 
-def unique_name():
-    timestamp = datetime.now().isoformat(sep='T', timespec='auto')
-    name = timestamp.replace(":", "_")
-    return name
-
-
 def save_images(images_aug_collection, out_path):
 
     for image in images_aug_collection:
@@ -68,6 +62,7 @@ def singleImageAugmentator(image_path, out_path, aug_seq, iterations):
     except PermissionError:
         print("Completed. Temporary not removable currently.")
         # Will have a removal failure.
+
 
 def singleFolderAugmentator(folder_path, out_path, aug_seg, iterations):
 
