@@ -6,8 +6,11 @@ import imageio
 import sklearn.utils
 import logging
 import tqdm
+from model.tfhelper import show_progress
+
 
 # Source inspired from CV-Tricks.com and https://github.com/sankit1/cv-tricks.com/blob/master/Tensorflow-tutorials/tutorial-2-image-classifier/dataset.py
+
 
 def load_train(train_path, image_size, classes):
     """
@@ -80,6 +83,7 @@ def load_train(train_path, image_size, classes):
 
     return images, labels, ids, cls
 
+
 def load_test(test_path, image_size):
     """
     Load a sets of files from teh path and resize them appropriately.
@@ -127,6 +131,7 @@ def load_test(test_path, image_size):
     X_test = X_test / 255
 
     return X_test, X_test_id
+
 
 class DataSet(object):
 
@@ -212,6 +217,51 @@ class DataSet(object):
 
         return self._images[start:end], self._labels[start:end], self._ids[start:end], self._cls[start:end]
 
+    #
+    def train(self, total_iterations, num_iteration, data, batch_size, x, y_true, session, cost, optimizer, saver):
+        """
+        A function to train a session based on the
+        :param total_iterations: the current ITERATION prior to training
+        :param num_iteration: the number of ITERATION to be trained.
+        :param data:
+        :param batch_size:
+        :param x:
+        :param y_true:
+        :param session:
+        :param cost:
+        :param optimizer:
+        :param saver:
+        :return:
+        """
+        for i in range(total_iterations,
+                       total_iterations + num_iteration):
+
+
+            #TODO: check these two below.
+            train_dataset = self.train
+            validation_dataset = self.valid
+
+            #TODO: fix the next batch function that is being called.
+            x_batch, y_true_batch, _, cls_batch = train_dataset.next_batch(batch_size)
+            x_valid_batch, y_valid_batch, _, valid_cls_batch = validation_dataset.next_batch(batch_size)
+
+            feed_dict_tr = {x: x_batch,
+                            y_true: y_true_batch}
+            feed_dict_val = {x: x_valid_batch,
+                             y_true: y_valid_batch}
+
+            session.run(optimizer, feed_dict=feed_dict_tr)
+
+            if i % int(data.train.num_examples / batch_size) == 0:
+                val_loss = session.run(cost, feed_dict=feed_dict_val)
+                epoch = int(i / int(data.train.num_examples / batch_size))
+
+                show_progress(epoch, feed_dict_tr, feed_dict_val, val_loss)
+                saver.save(session, 'dogs-cats-model')
+
+        total_iterations += num_iteration
+        return total_iterations
+
 def read_train_sets(train_path, image_size, classes, validation_size=0):
     """
     Load the training dataset, separate them into validation portion OR not.
@@ -219,7 +269,7 @@ def read_train_sets(train_path, image_size, classes, validation_size=0):
     :param image_size:
     :param classes:
     :param validation_size:
-    :return:
+    :return: a initialized datasets that contain its own training portion and its validation porition
     """
 
     # Reference the class object
@@ -253,13 +303,14 @@ def read_train_sets(train_path, image_size, classes, validation_size=0):
     train_ids = ids[validation_size:]
     train_cls = cls[validation_size:]
 
-    # Create training dataset using the subset of raw data based on the index delineation point.
+    # Create a PROPERTY of the training subdataset using the subset of raw data based on the index delineation point.
     data_sets.train = DataSet(train_images, train_labels, train_ids, train_cls)
 
-    # Create validation dataset using the subset of raw data based on the index delineation point.
+    # Create a PROPERTY of the validation subdataset using the subset of raw data based on the index delineation point.
     data_sets.valid = DataSet(validation_images, validation_labels, validation_ids, validation_cls)
 
     return data_sets
+
 
 def read_test_set(test_path, image_size):
     """
