@@ -6,7 +6,7 @@ import imageio
 import sklearn.utils
 import logging
 import tqdm
-from model.tfhelper import show_progress
+#from model.tfhelper import show_progress
 
 
 # Source inspired from CV-Tricks.com and https://github.com/sankit1/cv-tricks.com/blob/master/Tensorflow-tutorials/tutorial-2-image-classifier/dataset.py
@@ -36,8 +36,6 @@ def load_train(train_path, image_size, classes):
 
     # Traverse every single class of images.
     for current_class in tqdm(classes):
-
-
 
         # Find class_index of the current class.
         class_index = classes.index(current_class)
@@ -134,6 +132,9 @@ def load_test(test_path, image_size):
 
 
 class DataSet(object):
+    """
+    A class for storing the data for ease of handling.
+    """
 
     def __init__(self, images, labels, ids, cls):
         """
@@ -158,7 +159,8 @@ class DataSet(object):
         self._ids = ids
         self._cls = cls
         self._epochs_completed = 0
-        self._index_in_epoch = 0
+
+        self._index_in_epoch = 0    # what is this?
 
 
     # Propery lists constructed.
@@ -188,19 +190,38 @@ class DataSet(object):
     # An instance function
     def next_batch(self, batch_size):
         """
-        Return the next `batch_size` examples from this data set.
+        Return the next `batch_size` examples from this data set, IF ran out of examples to draw from, quit and start a new batch.
+        This function update and keep track of the how much of the epoch we have gone through
         :param batch_size:
         :return:
         """
 
-        # Retrieve current epoch index
-        start = self._index_in_epoch
+        # Batch size needs to be smaller than the number of available examples ALWAYS
+        if not batch_size <= self._num_examples:
+            raise ValueError("Batch size MUST be smaller than the number of test examples available")
 
-        #
-        self._index_in_epoch += batch_size
+        start = None
+        end = None
 
-        if self._index_in_epoch > self._num_examples:
-            # Finished epoch
+        last_end_point = self._index_in_epoch
+        remaining_samples = self._num_examples - last_end_point
+
+        # Based on epoch completion status, we see only the batch that are relevant given current epoch.
+
+        # When, epoch is not finished, simply draw from the remaining:
+        if batch_size <= remaining_samples:
+
+            # Retrieve current epoch training example index
+            start = self._index_in_epoch
+            end = self._index_in_epoch + batch_size
+
+            # Set the Index in epoch for subsequent batch
+            self._index_in_epoch = self._index_in_epoch + batch_size
+
+        # When epoch is finished, start a new epoch, get more data to train.
+        elif batch_size > remaining_samples :
+
+            # Increment epoch count by 1 as not enough examples left to train, consider the epoch Finished
             self._epochs_completed += 1
 
             # # Shuffle the data (maybe)
@@ -210,57 +231,17 @@ class DataSet(object):
             # self._labels = self._labels[perm]
             # Start next epoch
 
+            # start from 0 index.
+
+            # Training start from teh beginning, to the batch size.
             start = 0
-            self._index_in_epoch = batch_size
-            assert batch_size <= self._num_examples
-        end = self._index_in_epoch
+            end = batch_size - 1
 
+            # set the ending point properly so next batch starts properly from the epoch index.
+            self._index_in_epoch = batch_size - 1
+
+        # retun the dataset from which we extract this batch: from the start (0 or the left over from last point) to the designed the end poitn.
         return self._images[start:end], self._labels[start:end], self._ids[start:end], self._cls[start:end]
-
-    #
-    def train(self, total_iterations, num_iteration, data, batch_size, x, y_true, session, cost, optimizer, saver):
-        """
-        A function to train a session based on the
-        :param total_iterations: the current ITERATION prior to training
-        :param num_iteration: the number of ITERATION to be trained.
-        :param data:
-        :param batch_size:
-        :param x:
-        :param y_true:
-        :param session:
-        :param cost:
-        :param optimizer:
-        :param saver:
-        :return:
-        """
-        for i in range(total_iterations,
-                       total_iterations + num_iteration):
-
-
-            #TODO: check these two below.
-            train_dataset = self.train
-            validation_dataset = self.valid
-
-            #TODO: fix the next batch function that is being called.
-            x_batch, y_true_batch, _, cls_batch = train_dataset.next_batch(batch_size)
-            x_valid_batch, y_valid_batch, _, valid_cls_batch = validation_dataset.next_batch(batch_size)
-
-            feed_dict_tr = {x: x_batch,
-                            y_true: y_true_batch}
-            feed_dict_val = {x: x_valid_batch,
-                             y_true: y_valid_batch}
-
-            session.run(optimizer, feed_dict=feed_dict_tr)
-
-            if i % int(data.train.num_examples / batch_size) == 0:
-                val_loss = session.run(cost, feed_dict=feed_dict_val)
-                epoch = int(i / int(data.train.num_examples / batch_size))
-
-                show_progress(epoch, feed_dict_tr, feed_dict_val, val_loss)
-                saver.save(session, 'dogs-cats-model')
-
-        total_iterations += num_iteration
-        return total_iterations
 
 def read_train_sets(train_path, image_size, classes, validation_size=0):
     """

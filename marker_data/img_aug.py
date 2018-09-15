@@ -44,6 +44,8 @@ def ImageAugmentator(image_path, out_path, aug_seq, iterations):
 
 
 def FolderAugmentator(folder_path, out_path, aug_seg, iterations):
+    # TODO: currently it seems to have some trouble reading from a folder and then CLOSE the god damn thing.
+
     """
     Augment the entire folder, using the augmentation sequence provided over the number of times requests.
     :param folder_path:
@@ -55,7 +57,7 @@ def FolderAugmentator(folder_path, out_path, aug_seg, iterations):
 
     # Generate temporary directory.
     with TemporaryDirectory() as temporary_path:
-        input_files = os.listdir(folder_path);
+        input_files = os.listdir(folder_path)
 
         # Duplicate the folder x times
         for x in range(0, iterations):

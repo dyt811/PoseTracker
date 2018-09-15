@@ -29,22 +29,35 @@ def doEverything():
 
     # Download bg.
     root_folder = get_abspath(os.path.realpath(__file__), 2)
-    bg_folder = os.path.join(root_folder, "bg_data","background")
-    arguments = \
-        {"keywords": "Office,patterns,logos,home,design,man-made",
-         "limit": 150,
+
+    bg_folder = os.path.join(root_folder, "bg_data")
+    downloaded_folder = os.path.join(bg_folder, "downloads")
+    cropped_folder = os.path.join(bg_folder, "cropped")
+    augmented_bg = os.path.join(bg_folder, "augmented")
+
+
+
+    marker_folder = os.path.join(root_folder, "marker_data")
+    prime = os.path.join(marker_folder, "Prime")
+    augmented_marker = os.path.join(marker_folder, "augmented")
+
+    combined_folder = os.path.join(root_folder, "merged_data")
+
+    download_specs = \
+        {"keywords": "black,black%20color,Office,patterns,logos,home,design,man-made",
+         "limit": 5,
          "chromedriver": r"C:\bin\chromedriver.exe",
          "size": ">800*600",
          "format": "jpg",
-         "print_urls": True}   # creating list of arguments
+         "print_urls": True}   # creating list of download_specs
 
-    #bg_list = downloadGoogleImages(arguments, bg_folder)
+    bg_list = downloadGoogleImages(download_specs, bg_folder)
 
-    downloaded_folder = os.path.join(bg_folder, "downloads")
 
     # Crop bgs
     from ImageCropper.extract import crop_folder_bg
-    crop_folder = crop_folder_bg(bg_folder, 500, 500)
+    crop_folder1 = crop_folder_bg(downloaded_folder, cropped_folder, 500, 500)  # with over added soon
+    crop_folder2 = crop_folder_bg(downloaded_folder, cropped_folder, 500, 500)  # server as control group
 
     # Augment bgs
     from marker_data.img_aug import FolderAugmentator
@@ -53,21 +66,27 @@ def doEverything():
     # Set augmentation parameters
     augmentation_sequences = BackgroundAug500px()
 
-    # Set and create the path of the augmentation
-    augmentation_folder = os.path.join(bg_folder, "Augmented", unique_name() + "_BackgroundAug500px")
-    os.makedirs(augmentation_folder)
+    # Set and create the path of the augmented background.
+    augmentation_bg_folder = os.path.join(augmented_bg, unique_name() + "500px")
+    os.makedirs(augmentation_bg_folder)
+    FolderAugmentator(crop_folder1, augmentation_bg_folder, augmentation_sequences, 5)
 
-    # Augment into that.
-    FolderAugmentator(crop_folder, augmentation_folder, augmentation_sequences, 5)
 
-    # Grab prime.
-
+    # Set and create the path of the augmented prime.
+    augmentation_prime_folder = os.path.join(augmented_marker, unique_name() + "500px")
+    os.makedirs(augmentation_prime_folder)
     # Augment prime
+    FolderAugmentator(prime, augmentation_prime_folder, augmentation_sequences, 5)
 
-    # Combine them to provide the training data set.
-    merged_folder = os.path.join(root_folder, "merged_data", "")
+    # Set and create the path of the combined augmented.
+    combined_path = os.path.join(combined_folder, os.path.basename(augmentation_bg_folder) + "+" + os.path.basename(augmentation_prime_folder))
+    os.makedirs(combined_path)
+
+    # Merge those two folders to generate the final data.
+    from ImageFuser.overlay import overlay_folder_random
+    overlay_folder_random(augmentation_bg_folder, augmentation_prime_folder, combined_path)
 
 if __name__ == "__main__":
     #crop_bg(500, 500)
-    #overlay_marker("C:\GitHub\MarkerTrainer\marker_data\Prime", "C:\GitHub\MarkerTrainer\marker_data\Background\cropped","C:\GitHub\MarkerTrainer\marker_data\Combined")
+    #overlay_marker("C:\GitHub\MarkerTrainer\marker_data\Prime", "C:\GitHub\MarkerTrainer\marker_data\Background\cropped","C:\GitHub\MarkerTrainer\marker_data\combined")
     doEverything()

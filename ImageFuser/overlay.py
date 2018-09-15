@@ -1,6 +1,7 @@
 import os
 from PIL import Image
 import random
+from tqdm import tqdm
 
 def overlay(image_bg, image_overlay, alpha):
 
@@ -14,7 +15,15 @@ def overlay(image_bg, image_overlay, alpha):
     return new_img
 
 
-def randomly(image_bg_path, image_overlay_path, alpha, output):
+def randomly(image_bg_path, image_overlay_path, output):
+    """
+    Over lay an image on top of the background image, and output it to certain location
+    :param image_bg_path:
+    :param image_overlay_path:
+    :param output:
+    :return:
+    """
+
     # suppose img1 and img2 are your two images
     bg = Image.open(image_bg_path)
     bg_width, bg_height = bg.size
@@ -36,6 +45,11 @@ def randomly(image_bg_path, image_overlay_path, alpha, output):
 
     #new_img = overlay(bg, overlay, alpha)
     bg.save(output, "PNG")
+
+def overlay_folder_random(bg_folder, overlay_folder, output_path):
+    for bg in tqdm(bg_folder):
+        for overlay in tqdm(overlay_folder):
+            randomly(bg, overlay, output_path)
 
 
 if __name__ == "__main__":

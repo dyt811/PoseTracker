@@ -84,10 +84,10 @@ def crop_folder(image_folder, output_folder, width, height):
                 print("Found a bad file. Ignoring: " + file + " from " + image_path)
                 continue
 
-def crop_folder_bg(image_folder, width, height):
+def crop_folder_bg(input_image_root_folder, output_root_folder, width, height):
     """
-    crop the background images and generate the cropped version of them that are only 500x500
-    :param image_folder: folder contain downloads.
+    A batch function for cropping the background images and generate the cropped version of them that are only 500x500
+    :param input_image_root_folder: folder contain downloads.
     :param width: width of the area will be cropped out.
     :param height: height of the area will be cropped out.
     :return:
@@ -95,21 +95,21 @@ def crop_folder_bg(image_folder, width, height):
     # Change into the directory
 
     # Ge the root of the folder contain GoogleDownloads
-    image_root = get_abspath(image_folder, 1)
+    image_root = os.path.basename(input_image_root_folder)
 
     # Generate the temp name that will be used to store the crop results.
-    crop_folder_name = unique_name() + "_" + str(width) + "x" + str(height) + "crop"
+    crop_folder_name = unique_name() + "_" + str(width) + "x" + str(height) + "crop_" + image_root
 
     # Make and crop path.
-    output_folder = os.path.join(image_root, "cropped", crop_folder_name)
+    output_subfolder = os.path.join(output_root_folder, crop_folder_name)
 
     # Make DIR if it does not already exist.
-    if not os.path.exists(output_folder):
-        os.makedirs(output_folder)
+    if not os.path.exists(output_subfolder):
+        os.makedirs(output_subfolder)
 
-    crop_folder(image_folder, output_folder, width, height)
+    crop_folder(input_image_root_folder, output_subfolder, width, height)
 
-    return output_folder
+    return output_subfolder
 
 if __name__ == "__main__":
     #randomly("../a.jpg", 400, 400)
