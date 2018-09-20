@@ -7,24 +7,32 @@ class configuration(object):
     def __init__(self, root_folder):
         pass
 
+        # Section 1 on BG
         # Set background data folder
         self.bg_folder = os.path.join(root_folder, "bg_data")
-
         # Set Sub-background data folder
         self.downloaded_folder = os.path.join(self.bg_folder, "downloads")
         self.cropped_folder = os.path.join(self.bg_folder, "cropped")
 
+        # Section 2 on Marker
         # Set marker data folder
-        self.marker_folder = os.path.join(root_folder, "marker_data")
-
+        self.overlay_folder = os.path.join(root_folder, "overlay_data")
         # Set prime marker subfolder
-        self.prime = os.path.join(self.marker_folder, "Prime")
+        self.prime_overlay = os.path.join(self.overlay_folder, "Prime")
 
+        # Section 3 on Combination
         # Set combined output folder.
         self.combined_folder = os.path.join(root_folder, "merged_data")
 
+        # Section 4 on Augmentation
         # Set Augmented ouptut based on combined.
         self.augmented_folder = os.path.join(root_folder, "augmented_data")
+
+        # Set Augmented prime marker
+        self.overlay_aug_folder = os.path.join(self.augmented_folder, "Marker")
+
+        # Set Augmented bg
+        self.bg_aug_folder = os.path.join(self.augmented_folder, "Bg")
 
     @property
     def bg(self):
@@ -34,25 +42,23 @@ class configuration(object):
         """
         return self.bg_folder
 
-
-
-
     @property
     def download(self):
         """
         path: return the path to the download folder
         files: returns all the list of the files within that root folder.
         """
-
-
-        download = namedtuple("path", "files")
-        files = recursive_list(self.downloaded_folder)
-
-        result = download(self.downloaded_folder, files)
-        return result
+        return self.downloaded_folder
 
     @property
     def download_files(self):
+        """
+        return a list of all downloaded files in the download folder.
+        :return:
+        """
+        from PythonUtils.folder import recursive_list
+        file_list = recursive_list(self.download)
+        return file_list
 
     @property
     def cropped(self):
@@ -63,36 +69,20 @@ class configuration(object):
         return self.cropped_folder
 
     @property
-    def bg_aug(self):
-        """
-        absolute path to the augmented, cropped background data root folder
-        :return:
-        """
-        return self.augmented_bg
-
-    @property
     def marker(self):
         """
         absolute path to the root folder of all marker related data
         :return:
         """
-        return self.marker_folder
+        return self.overlay_folder
 
     @property
-    def prime(self):
+    def overlay(self):
         """
         aboslute path to the prime folder which contains all the prototypical marker to be trained.
         :return:
         """
-        return self.prime
-
-    @property
-    def marker_aug(self):
-        """
-        absolute root path to the markers that have already been augmented
-        :return:
-        """
-        return self.augmented_marker
+        return self.prime_overlay
 
     @property
     def combined(self):
@@ -101,3 +91,19 @@ class configuration(object):
         :return:
         """
         return self.combined_folder
+
+    @property
+    def aug_overlay(self):
+        """
+        return the agumented overlay path.
+        :return:
+        """
+        return self.overlay_aug_folder
+
+    @property
+    def aug_bg(self):
+        """
+        return the agumented overlay path.
+        :return:
+        """
+        return self.bg_aug_folder

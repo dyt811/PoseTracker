@@ -2,8 +2,12 @@ from PIL import Image
 import random
 import os
 from PythonUtils.file import unique_name
-from PythonUtils.folder import recursive_list, get_abspath
+from PythonUtils.folder import recursive_list
+import logging
+import sys
 
+logging.basicConfig(stream=sys.stdout, level=logging.INFO)
+logger = logging.getLogger(__name__)
 """
 This class explores the images and crop out as many smaller conforming image section as possible. 
 """
@@ -67,7 +71,7 @@ def crop_folder(image_folder, output_folder, width, height):
             image_path = os.path.join(image_folder, file)
             image = randomly(image_path, width, height)
         except OSError:
-            print("Found a bad file. Ignoring: " + file)
+            logger.info("Found a bad file. Ignoring: " + file)
             continue
 
         file_name = file.replace(" ", "_")
@@ -78,10 +82,16 @@ def crop_folder(image_folder, output_folder, width, height):
             continue
         else:
             try:
-                image.save(bg_cropped_path, "PNG")
-                print("Saved ", bg_cropped_path)
+                # Generate a RGB image from the cropped image. This FORCE the image to be RGB even if it was originally GRAY scale!
+                rgbimg = Image.new("RGBA", image.size)
+
+                # Paste the image in.
+                rgbimg.paste(image)
+
+                rgbimg.save(bg_cropped_path, "PNG")
+                logger.info("Saved " + bg_cropped_path)
             except OSError:
-                print("Found a bad file. Ignoring: " + file + " from " + image_path)
+                logger.info("Found a bad file. Ignoring: " + file + " from " + image_path)
                 continue
 
 def crop_folder_bg(input_image_root_folder, output_root_folder, width, height):
