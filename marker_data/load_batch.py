@@ -20,10 +20,14 @@ def from_folder(path):
         # Regenerate the full abbsolute path.
         pathname = os.path.join(path, file)
 
-        # Read the image, add it to numpy array. Append it to data object to be returned in the end.
-        img = imread(pathname)
-        im = np.array(img)
-        data.append(im)
+        try:
+            # Read the image, add it to numpy array. Append it to data object to be returned in the end.
+            img = imread(pathname)
+            im = np.array(img)
+            data.append(im)
+        except Exception:
+            # Regardless of what happens, continue and process next file.
+            continue
 
     return data
 

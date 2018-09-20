@@ -46,7 +46,30 @@ def randomly(image_bg_path, image_overlay_path, output):
     #new_img = overlay(bg, overlay, alpha)
     bg.save(output, "PNG")
 
-def overlay_folder_random(bg_folder, overlay_folder, output_path):
+def overlay_subfolder(bg_folder, overlay_folder, output_root_path):
+    """
+    Wrapper function that output to a UNIQUE subfolder instead of directly into the folder. For output into a SPECIFIC output folder, use the overlay_folder instead.
+    :param bg_folder:
+    :param overlay_folder:
+    :param output_root_path:
+    :return:
+    """
+
+    from PythonUtils.file import unique_name
+    unique_path = output_root_path + unique_name()
+    os.makedirs(unique_path)
+    overlay_folder(bg_folder, overlay_folder, output_root_path)
+    return unique_path
+
+def overlay_folder(bg_folder, overlay_folder, output_path):
+    """
+    Output the combinatino of BG and OVERLAY into a TARGET folder.
+    :param bg_folder:
+    :param overlay_folder:
+    :param output_path:
+    :return:
+    """
+
     for bg in tqdm(bg_folder):
         for overlay in tqdm(overlay_folder):
             randomly(bg, overlay, output_path)

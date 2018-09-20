@@ -8,6 +8,7 @@ import os
 import logging
 
 logger = logging.getLogger("CombinationModule")
+from Specifiations.config import configuration
 
 
 
@@ -22,26 +23,18 @@ def overlay_marker(marker_folder, bg_folder, combined_folder):
     for marker in marker_folder:
         for bg in bg_folder:
             new_file_name = os.path.join(combined_folder, unique_name())
-            overlay.randomly(bg, marker, 0.5, new_file_name)
+            overlay.randomly(bg, marker, new_file_name)
             logger.info("Generated " + new_file_name)
 
-def doEverything():
-
-    # Download bg.
-    root_folder = get_abspath(os.path.realpath(__file__), 2)
-
-    bg_folder = os.path.join(root_folder, "bg_data")
-    downloaded_folder = os.path.join(bg_folder, "downloads")
-    cropped_folder = os.path.join(bg_folder, "cropped")
-    augmented_bg = os.path.join(bg_folder, "augmented")
 
 
+def download(config):
+    """
+    Download the entire list of images based on the parameters defined.
+    :param config: the configuration for pathing.
+    :return:
+    """
 
-    marker_folder = os.path.join(root_folder, "marker_data")
-    prime = os.path.join(marker_folder, "Prime")
-    augmented_marker = os.path.join(marker_folder, "augmented")
-
-    combined_folder = os.path.join(root_folder, "merged_data")
 
     download_specs = \
         {"keywords": "black,black%20color,Office,patterns,logos,home,design,man-made",
@@ -51,40 +44,69 @@ def doEverything():
          "format": "jpg",
          "print_urls": True}   # creating list of download_specs
 
-    bg_list = downloadGoogleImages(download_specs, bg_folder)
+    bg_list = downloadGoogleImages(download_specs, config.bg)
 
+
+def augment(input_path, output_path, aug_sequence, aug_description):
+    """
+
+    :param aug_sequence: the augmentation seuqence that will be applied.
+    :return:
+    """
+    from marker_data.img_aug import FolderAugmentator
+
+    # Set and create the path of the augmented background.
+    augmentation_bg_folder = os.path.join(output_path, unique_name() + aug_description)
+    os.makedirs(augmentation_bg_folder)
+    FolderAugmentator(input_path, augmentation_bg_folder, aug_sequence, 5)
+
+
+def doEverything():
+
+    # Download bg.
+    root_folder = get_abspath(os.path.realpath(__file__), 2)
+    path_config = configuration(root_folder)
+
+    download(path_config)
 
     # Crop bgs
     from ImageCropper.extract import crop_folder_bg
-    crop_folder1 = crop_folder_bg(downloaded_folder, cropped_folder, 500, 500)  # with over added soon
-    crop_folder2 = crop_folder_bg(downloaded_folder, cropped_folder, 500, 500)  # server as control group
+    crop_folder1 = crop_folder_bg(path_config.download, path_config.cropped, 500, 500)  # with over added soon
 
-    # Augment bgs
-    from marker_data.img_aug import FolderAugmentator
-    from marker_data.augmentation_sequence import BackgroundAug500px
+    crop_folder2 = crop_folder_bg(path_config.download, path_config.cropped, 500, 500)  # server as control group
 
-    # Set augmentation parameters
-    augmentation_sequences = BackgroundAug500px()
+    # Overlay PRIME on cropped BG.
+    from ImageFuser.overlay import overlay_subfolder
+    overlaid_cropped_folder = overlay_subfolder(crop_folder1, path_config.prime, path_config.combined)
 
-    # Set and create the path of the augmented background.
-    augmentation_bg_folder = os.path.join(augmented_bg, unique_name() + "500px")
-    os.makedirs(augmentation_bg_folder)
-    FolderAugmentator(crop_folder1, augmentation_bg_folder, augmentation_sequences, 5)
-
-
-    # Set and create the path of the augmented prime.
-    augmentation_prime_folder = os.path.join(augmented_marker, unique_name() + "500px")
+    # Set and create the path of the augmented prime
+    augmentation_prime_folder = os.path.join(path_config.marker_aug, unique_name() + "500px")
     os.makedirs(augmentation_prime_folder)
-    # Augment prime
-    FolderAugmentator(prime, augmentation_prime_folder, augmentation_sequences, 5)
 
     # Set and create the path of the combined augmented.
-    combined_path = os.path.join(combined_folder, os.path.basename(augmentation_bg_folder) + "+" + os.path.basename(augmentation_prime_folder))
+    combined_path = os.path.join(path_config.combined, os.path.basename(augmentation_bg_folder) + "+" + os.path.basename(augmentation_prime_folder))
     os.makedirs(combined_path)
 
-    # Merge those two folders to generate the final data.
-    from ImageFuser.overlay import overlay_folder_random
-    overlay_folder_random(augmentation_bg_folder, augmentation_prime_folder, combined_path)
+
+
+    # Augment bgs
+
+    from marker_data.augmentation_sequence import BackgroundAug500px
+    augment(crop_folder1, path_config.bg_aug, BackgroundAug500px(),  "500px")
+
+
+    # Augment prime
+    FolderAugmentator(path_config.prime, augmentation_prime_folder, augmentation_sequences, 5)
+
+
+
+def crop(config):
+    """
+    Crop ALL the images in the downloaded folder.
+    :param config: the confirugration pathing indicating where to obtain the files.
+    :return:
+    """
+
 
 if __name__ == "__main__":
     #crop_bg(500, 500)

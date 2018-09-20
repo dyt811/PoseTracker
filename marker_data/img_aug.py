@@ -62,8 +62,11 @@ def FolderAugmentator(input_folder_path, out_path, aug_seg, iterations):
     # Duplicate the folder x times
     for x in range(0, iterations):
         os.chdir(input_folder_path)
+
         # each time, duplicate all the files within it
         for file in input_files:
+
+            # Make sure to assign UNIQUE name.
             new_file_name = os.path.join(out_path, unique_name() + ".png")
             shutil.copyfile(file, new_file_name)
 
