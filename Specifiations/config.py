@@ -34,6 +34,9 @@ class configuration(object):
         # Set Augmented bg
         self.bg_aug_folder = os.path.join(self.augmented_folder, "Bg")
 
+        # Set Augmented merged
+        self.merged_aug_folder = os.path.join(self.augmented_folder, "Merged")
+
     @property
     def bg(self):
         """
@@ -107,3 +110,11 @@ class configuration(object):
         :return:
         """
         return self.bg_aug_folder
+
+    @property
+    def aug_merged(self):
+        """
+        return the agumented overlay path.
+        :return:
+        """
+        return self.merged_aug_folder

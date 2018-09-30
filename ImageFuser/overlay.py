@@ -16,7 +16,7 @@ def overlay(image_bg, image_overlay, alpha):
     return new_img
 
 
-def randomly(bg_image_path, overlay_image_path, output_image_path):
+def randomly(overlay_image_path, bg_image_path, output_image_path):
     """
     Over lay an image on top of the background image, and output it to certain location
     :param bg_image_path:
@@ -33,6 +33,7 @@ def randomly(bg_image_path, overlay_image_path, output_image_path):
     overlay_width, overlay_height = overlay.size
 
     if overlay_width > bg_width or overlay_height > bg_height:
+        logger.info("Overlay is bigger than background, skipping! Check your overlay dimension vs bg dimension!")
         return None
 
     #Coordinate calculation:
@@ -48,7 +49,7 @@ def randomly(bg_image_path, overlay_image_path, output_image_path):
     # New image name
 
     # file_name = os.path.join(output, unique_name() + os.path.basename(image_bg_path) + os.path.basename(image_overlay_path))
-
+    logger.info("Overlaid image "+ overlay_image_path + " on " + bg_image_path + ". Saved to:" + output_image_path)
     bg.save(output_image_path, "PNG")
 
 
@@ -60,8 +61,11 @@ def subfolder(bg_folder, overlay_folder, output_root_path):
     :param output_root_path:
     :return:
     """
-    unique_path = os.path.join(output_root_path, "Overlay_"+ unique_name() + os.path.basename(bg_folder) + "_" + os.path.basename(overlay_folder))
+    # Generate and make the directory
+    unique_path = os.path.join(output_root_path, "Overlay_"+ unique_name())
     os.makedirs(unique_path)
+
+    # Combine the bg and overlay folder into that folder.
     folder(bg_folder, overlay_folder, unique_path)
     return unique_path
 
@@ -81,7 +85,9 @@ def folder(bg_folder, overlay_folder, output_path):
     for bg_image in tqdm(bg_list):
         for overlay_image in overlay_list:
             try:
-                randomly(bg_image, overlay_image, output_path)
+                # Generate new image name.
+                merged_image = os.path.join(output_path, unique_name()+".png")
+                randomly(bg_image, overlay_image, merged_image)
             except FileNotFoundError:
                 logger.info(bg_image)
                 continue
