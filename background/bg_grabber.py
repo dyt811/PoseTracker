@@ -1,4 +1,5 @@
 from google_images_download import google_images_download
+from PythonUtils.folder import change
 import os
 
 def downloadGoogleImages(arguments, inputfolder):
@@ -7,7 +8,7 @@ def downloadGoogleImages(arguments, inputfolder):
     :param arguments:
     :return: a list of all the files downloaded
     """
-    os.chdir(inputfolder)
+    change(inputfolder)
     download_instance = google_images_download.googleimagesdownload()
     absolute_image_paths = download_instance.download(arguments)
     print(absolute_image_paths)   # printing absolute paths of the downloaded images

@@ -6,3 +6,4 @@ tqdm
 imageio
 opencv-python
 google_images_download
+imgaug
