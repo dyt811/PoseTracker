@@ -1,8 +1,7 @@
-from ImageCropper.extract import crop_folder_bg
 from ImageFuser import overlay
 from PythonUtils.file import unique_name
 from PythonUtils.folder import get_abspath
-from bg_data.bg_grabber import downloadGoogleImages
+from background.bg_grabber import downloadGoogleImages
 from Specifiations.config import configuration
 import os
 
@@ -52,8 +51,8 @@ def prepare_training_data():
     :returns: 1. Augmented folder with marker, 2. Control folder without marker.
     """
     from ImageFuser.overlay import subfolder as overlay_subfolder
-    from overlay_data.augmentation_sequence import MarkerAug, CombinedAug
-    from overlay_data.augmentation import subfolder as augment_subfolder
+    from overlay.augmentation_sequence import MarkerAug, CombinedAug
+    from overlay.augmentation import subfolder as augment_subfolder
     from ImageCropper.extract import crop_folder_bg
 
     # Download bg.
@@ -100,5 +99,5 @@ def prepare_training_data():
 
 if __name__ == "__main__":
     #crop_bg(500, 500)
-    #overlay_marker("C:\GitHub\MarkerTrainer\overlay_data\Prime", "C:\GitHub\MarkerTrainer\overlay_data\Background\cropped","C:\GitHub\MarkerTrainer\overlay_data\combined")
+    #overlay_marker("C:\GitHub\MarkerTrainer\data_overlay\Prime", "C:\GitHub\MarkerTrainer\data_overlay\Background\cropped","C:\GitHub\MarkerTrainer\data_overlay\combined")
     prepare_training_data()

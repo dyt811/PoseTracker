@@ -16,7 +16,7 @@ num_classes = len(classes)
 
 
 # Path of the training data folder
-train_path = 'merged_data/'
+train_path = 'data_merged/'
 
 # Validation proportion
 validation_size = 0.2

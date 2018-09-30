@@ -1,6 +1,3 @@
-[submodule "python-utils"]
-	path = python-utils
-	url = https://github.com/dyt811/python-utils
 [submodule "PythonUtils"]
 	path = PythonUtils
 	url = https://github.com/dyt811/PythonUtils

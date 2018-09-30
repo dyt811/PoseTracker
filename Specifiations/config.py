@@ -9,24 +9,24 @@ class configuration(object):
 
         # Section 1 on BG
         # Set background data folder
-        self.bg_folder = os.path.join(root_folder, "bg_data")
+        self.bg_folder = os.path.join(root_folder, "data_bg")
         # Set Sub-background data folder
         self.downloaded_folder = os.path.join(self.bg_folder, "downloads")
         self.cropped_folder = os.path.join(self.bg_folder, "cropped")
 
         # Section 2 on Marker
         # Set marker data folder
-        self.overlay_folder = os.path.join(root_folder, "overlay_data")
+        self.overlay_folder = os.path.join(root_folder, "data_overlay")
         # Set prime marker subfolder
         self.prime_overlay = os.path.join(self.overlay_folder, "Prime")
 
         # Section 3 on Combination
         # Set combined output folder.
-        self.combined_folder = os.path.join(root_folder, "merged_data")
+        self.combined_folder = os.path.join(root_folder, "data_merged")
 
         # Section 4 on Augmentation
         # Set Augmented ouptut based on combined.
-        self.augmented_folder = os.path.join(root_folder, "augmented_data")
+        self.augmented_folder = os.path.join(root_folder, "data_augmented")
 
         # Set Augmented prime marker
         self.overlay_aug_folder = os.path.join(self.augmented_folder, "Marker")
