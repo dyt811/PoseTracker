@@ -16,13 +16,13 @@ num_classes = len(classes)
 
 
 # Path of the training data folder
-train_path = 'data_merged/'
+train_path = r'E:\Gitlab\MarkerTrainer\data_training'
 
 # Validation proportion
-validation_size = 0.2
+validation_size = 0.333333
 
 # Batch size
-batch_size = 32
+batch_size = 16
 
 # Image related properties
 num_channels = 3    # color chanels?
@@ -193,4 +193,4 @@ def train(num_iteration):
     total_iterations += num_iteration
 
 
-train(num_iteration=3000)
+train(num_iteration=30)

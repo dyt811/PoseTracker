@@ -1,25 +1,35 @@
-from PythonUtils.file import unique_name
-from augmentation.augmentation_sequence import MarkerAug
+import sys
+print(sys.path)
+from PythonUtils.file import unique_name, filelist_delete, duplicates_into_folders
+from PythonUtils.folder import recursive_list
 import imageio
 import os
 import shutil
-from foreground.load_batch import from_folder
-from tqdm import tqdm
-import sys
+from foreground.load_batch import from_folder, from_filelist
+from tqdm import tqdm, trange
+import copy
 import logging
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
 def save_images(images_aug_collection, out_path):
-
-    for image in images_aug_collection:
+    """
+    Take an augmented image collection an a path, then iterate through the collection to save them.
+    :param images_aug_collection: the data bundle that has been properly augmented
+    :param out_path: the output ROOT path where all images will reside.
+    :return:
+    """
+    for image in tqdm(images_aug_collection):
         # import matplotlib.pyplot as plt
         # plt.imshow(image, aspect="auto")
         # plt.show()
 
+        # Generate the time stamp required.
         filename = os.path.join(out_path, unique_name() + ".png")
-        print(filename)
+
+        logger.info("Saving" + filename)
+
         # Saving the file.
         imageio.imwrite(filename, image)
 
@@ -66,6 +76,7 @@ def subfolder(input_path, output_path, aug_sequence, iterations, aug_description
 def folder(input_folder_path, out_path, aug_seg, iterations):
     """
     Duplicate the entire folder X iterations before augmenting the entire folder, using the augmentation sequence provided over the number of times requests.
+    It does a batch augmentation process per 1000 images because memory cannot load that many more at the same time.
     :param input_folder_path:
     :param out_path:
     :param aug_seg:
@@ -73,43 +84,58 @@ def folder(input_folder_path, out_path, aug_seg, iterations):
     :return:
     """
 
-    # Generate temporary directory.
-    #with TemporaryDirectory() as temporary_path:
-    input_files = os.listdir(input_folder_path)
+    input_files = recursive_list(input_folder_path)
 
-    # Duplicate the folder x times
-    for x in tqdm(range(0, iterations)):
-        os.chdir(input_folder_path)
+    # Duplicate the folder X times.
+    input_augment_files = duplicates_into_folders(input_files, out_path, iterations)
 
-        # each time, duplicate all the files within it
-        for file in input_files:
+    logger.info("Augmenting files from folder:" + out_path)
 
-            # Make sure to assign UNIQUE name.
-            new_file_name = os.path.join(out_path, unique_name() + ".png")
-            shutil.copyfile(file, new_file_name)
+    # Decide if to do batch augmentation or all augmentation.
+    with trange(len(input_augment_files)) as pbar:
 
-    logger.info("Augmenting from folder:" + out_path)
+        while len(input_augment_files) != 0:
+            # While the files to be processed < 1000, just read the damn thing.
+            if len(input_augment_files) < 1000:
+                processing_data = copy.deepcopy(input_augment_files) # Assign all remaining items to processing data.
+                input_augment_files.clear() # Empty the list to trigger exit condition.
 
-    # Load images into a giant matrices from the TEMP folder
-    images_ndarray = from_folder(out_path)
+            # When there are more files, we actually try to process 1k images at a time, augment, write out. then.
+            else:
+                # Transfer the top of the list to another variable.
+                processing_data = input_augment_files[0:999]
 
-    # Now that all images are in memory, time to delete all these "source" input files.
-    shutil.rmtree(out_path)
-    os.makedirs(out_path)
+                # Truncate original list.
+                del input_augment_files[0:999]
 
-    # Augment the giant matrices
-    images_augmented = aug_seg.augment_images(images_ndarray)
+            #COMMON PORTION. Previous section only modify the input_augment_files list and what needs to be processed.
+            # Load images into a giant matrices from the TEMP folder
+            images_ndarray = from_filelist(processing_data)
 
-    logger.info("Saving augmenting images to: " + out_path)
+            # Now that all images are in memory, time to delete all these "source" input files.
+            filelist_delete(processing_data)
 
-    # Save the augmented images out to path.
-    save_images(images_augmented, out_path)
+            # Augment the giant matrices
+            images_augmented = aug_seg.augment_images(images_ndarray)
+
+            logger.info("Saving augmenting images to: " + out_path)
+
+            # Save the augmented images out to path.
+            save_images(images_augmented, out_path)
+
+            # Update progress bar of the augmentation
+            pbar.update(len(input_augment_files))
+        pbar.close()
+        logger.info("All images augmented.")
 
 
+# When launching main, the path of the python is set to execute from THIS particular directory and will have trouble recognizing higher level as packages.
 if __name__ == "__main__":
-
+    from augmentation_sequence import MarkerAug
     # Get the right augmentation sequence.
     aug_seq = MarkerAug()
 
     # Load Prime images.
-    ImageAugmentator(r"E:\Gitlab\MarkerTrainer\overlay_data\Prime\100.png", r"E:\GitHub\MarkerTrainer\overlay_data\Altered", aug_seq, 10)
+    # ImageAugmentator(r"E:\Gitlab\MarkerTrainer\overlay_data\Prime\100.png", r"E:\GitHub\MarkerTrainer\overlay_data\Altered", aug_seq, 10)
+
+    folder(r"E:\Gitlab\MarkerTrainer\foreground\Prime", r"C:\temp\AugMarker", aug_seq, 10000)

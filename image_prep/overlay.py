@@ -2,7 +2,7 @@ import os
 from PIL import Image
 import random
 from tqdm import tqdm
-from PythonUtils.file import unique_name
+from PythonUtils.file import unique_name, recursive_list
 import logging
 import sys
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
@@ -54,7 +54,7 @@ def randomly(bg_image_path, overlay_image_path, output_image_path):
     logger.info("Overlaid image "+ overlay_image_path + " on " + bg_image_path + ". Saved to:" + output_image_path)
     bg.save(output_image_path, "PNG")
 
-def subfolder_random(bg_folder, overlay_folder, output_root_path, samples=100):
+def folder_random(bg_folder, overlay_folder, output_root_path, samples=100):
     """
     Wrapper function that output to a UNIQUE subfolder instead of directly into the folder. For output into a SPECIFIC output folder, use the folder_foreground instead.
     :param bg_folder:
@@ -68,7 +68,9 @@ def subfolder_random(bg_folder, overlay_folder, output_root_path, samples=100):
     unique_path = os.path.join(output_root_path, "Overlay_"+ unique_name())
     os.makedirs(unique_path)
 
-    folder_random(bg_folder, overlay_folder, unique_path, samples)
+    bg_list = recursive_list(bg_folder)
+    overlay_list = recursive_list(overlay_folder)
+    list_random(bg_list, overlay_list, unique_path, samples)
 
     return unique_path
 
@@ -87,7 +89,7 @@ def subfolder(bg_folder, overlay_folder, output_root_path):
 
     return unique_path
 
-def folder_random(bg_folder, overlay_folder, output_path, samples):
+def list_random(bg_list, overlay_list, output_path, samples):
     """
     Output the combinatino of BG and OVERLAY into a TARGET folder. in random draw manner.
     :param bg_folder:
@@ -95,15 +97,11 @@ def folder_random(bg_folder, overlay_folder, output_path, samples):
     :param output_path:
     :return:
     """
-    from PythonUtils.folder import recursive_list
-    bg_list = recursive_list(bg_folder)
-    overlay_list = recursive_list(overlay_folder)
-
     from random import randint
 
     # Generate this number of samples.
     i = 0
-    pbar = tqdm(total=samples)
+    pbar = tqdm(samples)
     while i < samples:
         # Randomly draw a bg
         bg_image = bg_list[randint(0, len(bg_list))-1]

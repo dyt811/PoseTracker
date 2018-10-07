@@ -5,7 +5,7 @@ import cv2
 import imageio
 import sklearn.utils
 import logging
-import tqdm
+from tqdm import tqdm
 #from model.tfhelper import show_progress
 
 
@@ -35,7 +35,7 @@ def load_train(train_path, image_size, classes):
 
 
     # Traverse every single class of images.
-    for current_class in tqdm(classes):
+    for current_class in classes:
 
         # Find class_index of the current class.
         class_index = classes.index(current_class)

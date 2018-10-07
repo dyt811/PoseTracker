@@ -1,10 +1,12 @@
 from PIL import Image
 import random
 import os
-from PythonUtils.file import unique_name
+from PythonUtils.file import unique_name, duplicates_into_folders
 from PythonUtils.folder import recursive_list
 import logging
 import sys
+from tqdm import tqdm
+import shutil
 
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -49,10 +51,55 @@ def randomly(image, width, height):
 
     return area(image, random_crop_x, random_crop_y, width, height)
 
-def crop_folder(image_folder, output_folder, width, height):
+def crop_filelist(filelist, output_folder, width, height, iterations):
     """
     crop the background images and generate the cropped version of them that are only 500x500
     :param image_folder: folder contain downloads.
+    :param width: width of the area will be cropped out.
+    :param height: height of the area will be cropped out.
+    :return:
+    """
+
+    # Duplicate input file lists X iterations into the output destination
+    updated_filelist = duplicates_into_folders(filelist,output_folder, iterations)
+
+    # For all the files, try to convert and export to that address
+    for file in tqdm(updated_filelist):
+        try:
+            image_path = file
+            image = randomly(image_path, width, height)
+        except OSError:
+            logger.info("Found a bad file. Ignoring: " + file)
+            continue
+
+        bg_cropped_path = os.path.join(output_folder, unique_name() + ".png")
+
+        if image is None:
+            continue
+        else:
+            try:
+                # Generate a RGB image from the cropped image. This FORCE the image to be RGB even if it was originally GRAY scale!
+                rgbimg = Image.new("RGBA", image.size)
+
+                # Paste the image in.
+                rgbimg.paste(image)
+
+                # Save the file.
+                rgbimg.save(bg_cropped_path, "PNG")
+                logger.info("Saved " + bg_cropped_path)
+
+                # Delete the original
+                os.remove(file)
+            except OSError:
+                logger.info("Found a bad file. Ignoring: " + file + " from " + image_path)
+                continue
+
+
+def crop_folder(image_folder, output_folder, width, height, iterations):
+    """
+    crop the background images and generate the cropped version of them that are only 500x500
+    :param image_folder: folder contain downloads.
+    :param output_folder: folder where all the output will be dumped into
     :param width: width of the area will be cropped out.
     :param height: height of the area will be cropped out.
     :return:
@@ -65,36 +112,10 @@ def crop_folder(image_folder, output_folder, width, height):
     if not os.path.exists(output_folder):
         os.makedirs(output_folder)
 
-    # For all the files, try to convert and export to that address
-    for file in files:
-        try:
-            image_path = os.path.join(image_folder, file)
-            image = randomly(image_path, width, height)
-        except OSError:
-            logger.info("Found a bad file. Ignoring: " + file)
-            continue
+    crop_filelist(files, output_folder, width, height, iterations)
 
-        file_name = file.replace(" ", "_")
-        file_name = os.path.basename(file_name)
-        bg_cropped_path = os.path.join(output_folder, file_name)
 
-        if image is None:
-            continue
-        else:
-            try:
-                # Generate a RGB image from the cropped image. This FORCE the image to be RGB even if it was originally GRAY scale!
-                rgbimg = Image.new("RGBA", image.size)
-
-                # Paste the image in.
-                rgbimg.paste(image)
-
-                rgbimg.save(bg_cropped_path, "PNG")
-                logger.info("Saved " + bg_cropped_path)
-            except OSError:
-                logger.info("Found a bad file. Ignoring: " + file + " from " + image_path)
-                continue
-
-def crop_folder_bg(input_image_root_folder, output_root_folder, width, height):
+def crop_folder_bg(input_image_root_folder, output_root_folder, width, height, iterations):
     """
     A batch function for cropping the background images and generate the cropped version of them that are only 500x500
     :param input_image_root_folder: folder contain downloads.
@@ -102,22 +123,17 @@ def crop_folder_bg(input_image_root_folder, output_root_folder, width, height):
     :param height: height of the area will be cropped out.
     :return:
     """
-    # Change into the directory
-
-    # Ge the root of the folder contain GoogleDownloads
-    image_root = os.path.basename(input_image_root_folder)
-
     # Generate the temp name that will be used to store the crop results.
-    crop_folder_name = unique_name() + "_" + str(width) + "x" + str(height) + "crop_" + image_root
+    crop_folder_name = unique_name() + "_" + str(width) + "x" + str(height)
 
-    # Make and crop path.
+    # Combine folder and root to form path name.
     output_subfolder = os.path.join(output_root_folder, crop_folder_name)
 
     # Make DIR if it does not already exist.
     if not os.path.exists(output_subfolder):
         os.makedirs(output_subfolder)
 
-    crop_folder(input_image_root_folder, output_subfolder, width, height)
+    crop_folder(input_image_root_folder, output_subfolder, width, height, iterations)
 
     return output_subfolder
 
