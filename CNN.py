@@ -22,7 +22,7 @@ train_path = r'E:\Gitlab\MarkerTrainer\data_training'
 validation_size = 0.333333
 
 # Batch size
-batch_size = 16
+batch_size = 8
 
 # Image related properties
 num_channels = 3    # color chanels?
@@ -75,16 +75,28 @@ Network Graph Parameters.
 """
 
 # Layer Paramemters:
-L1_filter = 32
+L1_filter = 128
 L1_convSize = 3
 
-L2_filter = 32
+L2_filter = 64
 L2_convSize = 3
 
-L3_filter = 64
+L3_filter = 32
 L3_convSize = 3
 
-FC1_size = 128
+L4_filter = 16
+L4_convSize = 3
+
+L5_filter = 8
+L5_convSize = 3
+
+L6_filter = 4
+L6_convSize = 3
+
+L7_filter = 2
+L7_convSize = 3
+
+FC1_size = 64
 
 
 """
@@ -107,8 +119,29 @@ conv_stack3 = tfl.create_convolutional_stack(input              = conv_stack2,
                                              conv_filter_size   = L3_convSize,
                                              num_filters        = L3_filter)
 
+conv_stack4 = tfl.create_convolutional_stack(input              = conv_stack3,
+                                             num_input_channels = L3_filter,
+                                             conv_filter_size   = L4_convSize,
+                                             num_filters        = L4_filter)
+
+conv_stack5 = tfl.create_convolutional_stack(input              = conv_stack4,
+                                             num_input_channels  = L4_filter,
+                                             conv_filter_size   = L5_convSize,
+                                             num_filters        = L5_filter)
+
+conv_stack6 = tfl.create_convolutional_stack(input              = conv_stack5,
+                                             num_input_channels = L5_filter,
+                                             conv_filter_size   = L6_convSize,
+                                             num_filters        = L6_filter)
+
+conv_stack7 = tfl.create_convolutional_stack(input              = conv_stack6,
+                                             num_input_channels  = L6_filter,
+                                             conv_filter_size   = L7_convSize,
+                                             num_filters        = L7_filter)
+
+
 # Building the Flat Layers
-layer_flat = tfl.create_flatten_layer(conv_stack3)
+layer_flat = tfl.create_flatten_layer(conv_stack7)
 
 # Building the Fully Connected Layers
 fc_stack1 = tfl.create_fc_stack(input       = layer_flat,
