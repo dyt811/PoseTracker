@@ -1,0 +1,47 @@
+2018-10-09T215410EST
+7 layer CNN with 128 pixels input. Too large, not learning fast enough. stuck at loss 5.15
+Increase epoch. Reduce each epoch.
+reduced batch size.
+Going to reduce each epoch time to a few minutes.
+
+2018-10-09T230814EST
+Vastly underfitting the model.
+Not going to solve the issue in a reasonable amount of time. Parameters need to be rechosen.
+Reduced batch size further with reduce steps per epoch.
+Intergrated tensorboard to see.
+Trying to achieve over fit first before reducing it.
+
+;time
+Even first epoch, loss is lower... validation is... about the same.
+crappy learning. No improvement.
+Trying batch normalization and reduce dropout and randomness to introduce overfit.
+
+1:53:
+increase stride definitely helped the loss to come down MUCH faster. 10 to 3! val loss around 1.
+Loss is now at 0.6! and won
+
+10:23
+without dropout, the val loss continues to rise while loss is low.
+added keras save to the callback list.
+Reduced dropout to 0.1, 0.2 might be too high in my case with already augmented data.
+FIRST epoch you should see drastic loss decrease or else the model is not working.
+adadelta might be a great idea to try see examples: http://ruder.io/optimizing-gradient-descent/index.html#challenges
+
+14:40
+0.1 dropout does not seems to be enough. But I also used AdaDelta.
+Going to increase dropout in the final stage too.
+So far, most network it seems within 30 minutes, I should be able to tell how well it is performing. NO point training longer than that.
+Also increased batch size to see.
+
+15:35
+After increasing dropout, definitely seeing better trend where both loss and val-loss are decreasing.
+
+
+15:50
+Remove RGB to gray scale for more data throughput.
+
+8:45
+After increasing the view area size, the val accuracy increase from 55% to 75% .
+added leaky relu and further view size to see if it helps.
+todo
+remove softmax to provide continuous label for w p r.
