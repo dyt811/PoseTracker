@@ -28,7 +28,9 @@ def randomly(bg_image_path, overlay_image_path, output_image_path):
     """
 
     # suppose img1 and img2 are your two images
+
     bg = Image.open(bg_image_path)
+
     bg_width, bg_height = bg.size
 
     overlay = Image.open(overlay_image_path)
@@ -117,8 +119,9 @@ def list_random(bg_list, overlay_list, output_path, samples):
 
             i = i + 1  # only increase counter if successfully generated one
             pbar.update(i)
-        except FileNotFoundError:
+        except: #FileNotFoundError or OSError or IOError
             logger.info("Bad image found during overlay: " + bg_image)
+
             continue
     pbar.close()
 
