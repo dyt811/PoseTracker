@@ -44,21 +44,33 @@ def load_data_and_run(model,input_shape, TBCallBack):
 
 def createModel(input_shape, output_classes):
     model = Sequential()
-    model.add(Conv2D(16, (5, 5), padding='same', strides=(2,2), input_shape=(input_shape, input_shape, 1)))
+    model.add(Conv2D(16, (3, 3), padding='same', strides=(2,2), input_shape=(input_shape, input_shape, 1)))
     model.add(LeakyReLU(alpha=0.1))
     #model.add(Conv2D(16, (5, 5), activation='relu'))
     model.add(MaxPooling2D(pool_size=(2, 2)))
     model.add(Dropout(0.2))
 
-    model.add(Conv2D(32, (5, 5), padding='same', strides=(2,2)))
+    model.add(Conv2D(16, (3, 3), padding='same', strides=(1,1)))
     model.add(LeakyReLU(alpha=0.1))
     #model.add(Conv2D(32, (5, 5), activation='relu'))
     model.add(MaxPooling2D(pool_size=(2, 2)))
     model.add(Dropout(0.2))
 
-    model.add(Conv2D(64, (5, 5), padding='same', strides=(2,2)))
+    model.add(Conv2D(32, (3, 3), padding='same', strides=(1,1)))
     model.add(LeakyReLU(alpha=0.1))
     #model.add(Conv2D(64, (5, 5), activation='relu'))
+    model.add(MaxPooling2D(pool_size=(2, 2)))
+    model.add(Dropout(0.2))
+
+    model.add(Conv2D(32, (3, 3), padding='same', strides=(1, 1)))
+    model.add(LeakyReLU(alpha=0.1))
+    # model.add(Conv2D(64, (5, 5), activation='relu'))
+    model.add(MaxPooling2D(pool_size=(2, 2)))
+    model.add(Dropout(0.2))
+
+    model.add(Conv2D(64, (3, 3), padding='same', strides=(1, 1)))
+    model.add(LeakyReLU(alpha=0.1))
+    # model.add(Conv2D(64, (5, 5), activation='relu'))
     model.add(MaxPooling2D(pool_size=(2, 2)))
     model.add(Dropout(0.2))
 
@@ -79,7 +91,7 @@ if __name__ =="__main__":
     from time import time
 
     cleanLog()
-    image_size = 256
+    image_size = 250
     model1 = createModel(image_size, 2) # downsize to 128
     model1.compile(loss="sparse_categorical_crossentropy", optimizer="adadelta", metrics=["acc", "mae"])
 
