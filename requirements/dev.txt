@@ -1,5 +1,5 @@
-tensorflow-gpu
-tensorflow
+#tensorflow-gpu
+#tensorflow
 pillow
 Augmentor
 tqdm
@@ -7,3 +7,4 @@ imageio
 opencv-python
 google_images_download
 imgaug
+pandas

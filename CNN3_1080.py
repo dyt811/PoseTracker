@@ -9,22 +9,40 @@ from PythonUtils.file import unique_name, filelist_delete, recursive_list
 
 from generator.PoseDataSequence import DataSequence
 from generator.csvgen import generate_csv
+from PythonUtils.folder import get_abspath
 
-def cleanLog(path=r"/home/dyt811/Git/MarkerTrainer/logs"):
-    if os.path.exists(path):
-        files = recursive_list(path)
+def cleanLog(input_path):
+    if input_path is None:
+        # Dynamicly generate model input_path.
+        project_root = os.path.realpath(__file__)
+        log_path = os.path.join(os.path.dirname(project_root), "logs")
+    else:
+        log_path = input_path
+
+    if os.path.exists(log_path):
+        files = recursive_list(log_path)
         if len(files) > 0:
             filelist_delete(files)
 
 def load_data_and_run(model,input_shape, TBCallBack):
-    generate_csv(r"C:\Yang\Dropbox\Machine_Learning\orientation_training", r"C:\Yang\Dropbox\Machine_Learning\train.csv")
-    train_data = DataSequence(r"C:\Yang\Dropbox\Machine_Learning\train.csv", 100, mode="Train")
+    train_path          = r"C:\Yang\Dropbox\Machine_Learning\orientation_training"
+    train_csv_path      = r"C:\Yang\Dropbox\Machine_Learning\train.csv"
+    validate_path       = r"C:\Yang\Dropbox\Machine_Learning\orientation_training"
+    validate_csv_path   = r"C:\Yang\Dropbox\Machine_Learning\validate.csv"
 
-    generate_csv(r"C:\Yang\Dropbox\Machine_Learning\orientation_validation",
-                 r"C:\Yang\Dropbox\Machine_Learning\validate.csv")
-    validation_data = DataSequence(r"C:\Yang\Dropbox\Machine_Learning\validate.csv", 100)
+    # Dynamicly generate model path.
+    project_root = os.path.realpath(__file__)
+    model_path = os.path.join(os.path.dirname(project_root),"models")
 
-    model_name = os.path.join(r"C:\GitHub\MarkerTrainer\model", unique_name())
+    generate_csv(train_path, train_csv_path )
+    train_data = DataSequence(train_csv_path, 100, mode="Train")
+
+    generate_csv(validate_path,validate_csv_path)
+    validation_data = DataSequence(validate_csv_path, 100)
+
+    get_abspath()
+
+    model_name = os.path.join(model_path, unique_name())
 
     checkpoint = ModelCheckpoint(model_name, monitor='val_acc', verbose=1, save_best_only=True, mode='max')
     callbacks_list = [TBCallBack, checkpoint]
@@ -37,7 +55,7 @@ def load_data_and_run(model,input_shape, TBCallBack):
             validation_steps=100,
             callbacks=callbacks_list
     )
-    model.save(os.path.join(r'C:\GitHub\MarkerTrainer\model', unique_name()))
+    model.save(os.path.join(model_path, unique_name()))
 
 def createModel(input_shape, output_classes):
     model = Sequential()
