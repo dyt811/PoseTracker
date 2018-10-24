@@ -85,8 +85,6 @@ def createModel(input_shape, output_classes):
     model.add(Dropout(0.5))
     model.add(Dense(output_classes))
 
-    # Param: 276138
-
     return model
 
 if __name__ =="__main__":
@@ -94,7 +92,7 @@ if __name__ =="__main__":
 
     cleanLog()
     image_size = 480
-    model1 = createModel(image_size, 3) # downsize to 128
+    model1 = createModel(image_size, 4) # downsize to 128
     model1.compile(loss="sparse_categorical_crossentropy", optimizer="adadelta", metrics=["acc", "mae"])
 
     tensorboard = keras.callbacks.TensorBoard(
