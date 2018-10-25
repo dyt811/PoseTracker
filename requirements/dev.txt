@@ -8,3 +8,4 @@ opencv-python
 google_images_download
 imgaug
 pandas
+python-dotenv
