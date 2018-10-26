@@ -1,5 +1,5 @@
 from keras.models import Sequential
-from keras.layers import Dense, Conv2D, MaxPooling2D, Dropout, Flatten, Activation
+from keras.layers import Dense, Conv2D, MaxPooling2D, Dropout, Flatten, BatchNormalization
 from keras.callbacks import TensorBoard, ModelCheckpoint
 from keras.layers import LeakyReLU
 import keras
@@ -8,7 +8,6 @@ from PythonUtils.file import unique_name, filelist_delete, recursive_list
 
 from generator.PoseDataSequence import DataSequence
 from generator.csvgen import generate_csv
-from PythonUtils.folder import get_abspath
 from dotenv import load_dotenv
 
 def cleanLog(input_path):
@@ -59,45 +58,55 @@ def load_data_and_run(model,input_shape, TBCallBack):
 def createModel(input_shape, output_classes):
     model = Sequential()
     model.add(Conv2D(16, (5, 5), padding='same', strides=(2,2), input_shape=(input_shape, input_shape, 3)))
-    model.add(LeakyReLU(alpha=0.1))
+    model.add(BatchNormalization(axis=-1))
+    model.add(LeakyReLU(alpha=0.2))
     #model.add(Conv2D(16, (5, 5), activation='relu'))
     model.add(MaxPooling2D(pool_size=(2, 2)))
     model.add(Dropout(0.2))
 
     model.add(Conv2D(16, (3, 3), padding='same', strides=(1,1)))
-    model.add(LeakyReLU(alpha=0.1))
+    model.add(BatchNormalization(axis=-1))
+    model.add(LeakyReLU(alpha=0.2))
     #model.add(Conv2D(32, (5, 5), activation='relu'))
     model.add(MaxPooling2D(pool_size=(2, 2)))
     model.add(Dropout(0.2))
 
-    # model.add(Conv2D(32, (3, 3), padding='same', strides=(1,1)))
-    # model.add(LeakyReLU(alpha=0.1))
+    model.add(Conv2D(32, (3, 3), padding='same', strides=(1,1)))
+    model.add(BatchNormalization(axis=-1))
+    model.add(LeakyReLU(alpha=0.2))
     # #model.add(Conv2D(64, (5, 5), activation='relu'))
-    # model.add(MaxPooling2D(pool_size=(2, 2)))
-    # model.add(Dropout(0.2))
+    model.add(MaxPooling2D(pool_size=(2, 2)))
+    model.add(Dropout(0.2))
     #
-    # model.add(Conv2D(32, (3, 3), padding='same', strides=(1,1)))
-    # model.add(LeakyReLU(alpha=0.1))
+    model.add(Conv2D(32, (3, 3), padding='same', strides=(1,1)))
+    model.add(BatchNormalization(axis=-1))
+    model.add(LeakyReLU(alpha=0.2))
     # #model.add(Conv2D(64, (5, 5), activation='relu'))
-    # model.add(MaxPooling2D(pool_size=(2, 2)))
-    # model.add(Dropout(0.2))
+    model.add(MaxPooling2D(pool_size=(2, 2)))
+    model.add(Dropout(0.2))
     #
-    # model.add(Conv2D(64, (3, 3), padding='same', strides=(1,1)))
-    # model.add(LeakyReLU(alpha=0.1))
+    model.add(Conv2D(64, (3, 3), padding='same', strides=(1,1)))
+    model.add(BatchNormalization(axis=-1))
+    model.add(LeakyReLU(alpha=0.2))
     # #model.add(Conv2D(64, (5, 5), activation='relu'))
-    # model.add(MaxPooling2D(pool_size=(2, 2)))
-    # model.add(Dropout(0.2))
+    model.add(MaxPooling2D(pool_size=(2, 2)))
+    model.add(Dropout(0.2))
     #
-    # model.add(Conv2D(64, (3, 3), padding='same', strides=(1, 1)))
-    # model.add(LeakyReLU(alpha=0.1))
-    # # model.add(Conv2D(64, (5, 5), activation='relu'))
-    # model.add(MaxPooling2D(pool_size=(2, 2)))
-    # model.add(Dropout(0.2))
+    model.add(Conv2D(64, (3, 3), padding='same', strides=(1, 1)))
+    model.add(BatchNormalization(axis=-1))
+    model.add(LeakyReLU(alpha=0.2))
+    # model.add(Conv2D(64, (5, 5), activation='relu'))
+    model.add(MaxPooling2D(pool_size=(2, 2)))
+    model.add(Dropout(0.2))
 
     model.add(Flatten())
+    #model.add(Dense(2048))
+    #model.add(LeakyReLU(alpha=0.1))
     model.add(Dense(1024))
+    model.add(BatchNormalization())
     model.add(LeakyReLU(alpha=0.1))
     model.add(Dense(512))
+    model.add(BatchNormalization())
     model.add(LeakyReLU(alpha=0.1))
     model.add(Dropout(0.5))
     model.add(Dense(output_classes))
@@ -110,7 +119,7 @@ if __name__ =="__main__":
     cleanLog(None)
     image_size = 480
     model1 = createModel(image_size, 3) # downsize to 128
-    model1.compile(loss="sparse_categorical_crossentropy", optimizer="adadelta", metrics=["acc", "mae"])
+    model1.compile(loss="mean_squared_error", optimizer="adadelta", metrics=["acc", "mae"])
 
     # Dynamicly generate model input_path.
     project_root = os.path.realpath(__file__)

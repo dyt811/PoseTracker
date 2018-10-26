@@ -43,5 +43,11 @@ Remove RGB to gray scale for more data throughput.
 8:45
 After increasing the view area size, the val accuracy increase from 55% to 75% .
 added leaky relu and further view size to see if it helps.
+
 todo
 remove softmax to provide continuous label for w p r.
+
+2018-10-26 20:34
+Constructed the multile regression for WPR but it is probably overlearning as the validation accuracy hover around 40% at best.
+
+Added batch normalization to all process.

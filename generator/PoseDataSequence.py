@@ -25,8 +25,8 @@ class DataSequence(Sequence):
         # x, y, z, w, p, r, file
 
         # Take labels and a list of image locations in memory
-        #self.labels = self.df[['r1', 'r2', 'r0']].values # THIS IS Y
-        self.labels = self.df[['r1']].values  # THIS IS Y
+        self.labels = self.df[['r1', 'r2', 'r0']].values # THIS IS Y
+        #self.labels = self.df[['r1']].values  # THIS IS Y
         self.im_list = self.df['file'].tolist()
 
     def __len__(self):
@@ -57,7 +57,7 @@ class DataSequence(Sequence):
         numpy_image_array = [] #list of PIL.Image image mode
         partial_image_list = self.im_list[index * self.batch_size: (1 + index) * self.batch_size]
         for image in partial_image_list:
-            PIL_image = load_img(image) # here is where we can resize the images.
+            PIL_image = load_img(image)#, color_mode='grayscale') # here is where we can resize the images.
             numpy_image = np.array(PIL_image)
             numpy_image_array.append(numpy_image)
 
