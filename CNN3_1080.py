@@ -35,10 +35,10 @@ def load_data_and_run(model,input_shape, TBCallBack):
     model_path = os.path.join(os.path.dirname(project_root), "models")
 
     generate_csv(train_path, train_csv_path )
-    train_data = DataSequence(train_csv_path, 100, mode="Train")
+    train_data = DataSequence(train_csv_path, 128, mode="Train")
 
     generate_csv(validate_path,validate_csv_path)
-    validation_data = DataSequence(validate_csv_path, 100)
+    validation_data = DataSequence(validate_csv_path, 128)
 
     model_name = os.path.join(model_path, unique_name())
 
@@ -47,10 +47,10 @@ def load_data_and_run(model,input_shape, TBCallBack):
 
     model.fit_generator(
             train_data,
-            steps_per_epoch=100,
-            epochs=50,
+            steps_per_epoch=256,
+            epochs=500,
             validation_data=validation_data,
-            validation_steps=100,
+            validation_steps=256,
             callbacks=callbacks_list
     )
     model.save(os.path.join(model_path, unique_name()))
@@ -117,7 +117,7 @@ if __name__ =="__main__":
     from time import time
 
     cleanLog(None)
-    image_size = 480
+    image_size = 500
     model1 = createModel(image_size, 3) # downsize to 128
     model1.compile(loss="mean_squared_error", optimizer="adadelta", metrics=["acc", "mae"])
 
