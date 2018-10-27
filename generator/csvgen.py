@@ -2,7 +2,7 @@ from generator.PoseDataSequence import DataSequence
 import imghdr, os
 import csv, json
 from PythonUtils.file import read_json
-
+from tqdm import tqdm
 def generate_csv(folder_path, csv_path):
     """
     Given a path to a folder with images, and their JSON files, output a CSV of:
@@ -62,7 +62,7 @@ def delete_not_recognized_images(folder_path):
     accepted_extensions=('png', 'jpg', 'gif', 'jpeg', 'tif', 'bmp')
 
 
-    for file in file_list:
+    for file in tqdm(file_list):
         # Header image header name.
         image_format = imghdr.what(file)
 
@@ -83,4 +83,5 @@ def generate_train_sequence(csv_path):
     # model.fit_generator(sequence, epochs=1, use_multiprocessing=True)
 
 if __name__ == "__main__":
-    generate_csv(r"C:\Yang\Dropbox\Machine_Learning\Recordings", r"C:\Temp\test_output.csv")
+    #generate_csv(r"C:\Yang\Dropbox\Machine_Learning\Recordings", r"C:\Temp\test_output.csv")
+    delete_not_recognized_images(r"C:\Temp\ProcessedBatch5")
